@@ -1,0 +1,36 @@
+# The native C-ABI wrapper: a thin cdylib/staticlib around `sasso::compile`,
+# for embedding the compiler in other languages (Ruby, Python, Go, PHP, C/C++,
+# …). Like the wasm wrapper it lives OUTSIDE the `sasso` workspace (see
+# ../Cargo.toml `[workspace] exclude = ["wasm"]` — and `ffi` below) so the core
+# crate keeps `unsafe_code = "deny"` and zero dependencies while this layer may
+# use the `unsafe` an `extern "C"` ABI requires. No bindgen: the C header
+# (`include/sasso.h`) is hand-written and committed, keeping the crate
+# dependency-free in the project's spirit.
+#
+# Self-contained workspace root: stops cargo's upward manifest walk here, so the
+# crate resolves identically from the main checkout and from nested git
+# worktrees (matching the wasm wrapper's rationale).
+[workspace]
+
+[package]
+name = "sasso-ffi"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.74"
+license = "MIT OR Apache-2.0"
+description = "Native C-ABI bindings for the sasso SCSS compiler."
+publish = false
+
+[lib]
+name = "sasso_ffi"
+# cdylib for dynamic linking (libsasso_ffi.so/.dylib/.dll), staticlib for
+# linking the example C/Python harness and for embedders who prefer a .a.
+crate-type = ["cdylib", "staticlib"]
+
+[dependencies]
+sasso = { path = ".." }
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = true

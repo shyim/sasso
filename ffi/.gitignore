@@ -1,0 +1,8 @@
+# Build artifacts — the native libraries are built per-platform (locally or in
+# CI) and not committed.
+/target
+/Cargo.lock
+
+# Python example scratch
+__pycache__/
+*.pyc
